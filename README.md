@@ -15,6 +15,6 @@ Integration with [Pixel Ambient Services - Now Playing](https://play.google.com/
 
 1. Run `npm install` to install server dependencies.
 
-2. Run `heroku config:get MONGODB_URI -s  >> .env` to install Heroku Environment Variables.
+2. Run `heroku config:get MONGODB_URI -s  >> .env && heroku config:get SPOTIFY_ID -s  >> .env && heroku config:get SPOTIFY_SECRET -s  >> .env` to install Heroku Environment Variables.
 
 3. Run `nf run nodemon index.js` to start the development server.
