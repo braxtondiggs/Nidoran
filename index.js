@@ -15,11 +15,16 @@ app.use(errorHandler);
 app.use(cors());
 
 app.get('/', (req, res, next) => {
-  console.log('More to Come');
-  res.json({
-    status: 'hello'
-  });
+  const params = ['yesterday', 'last7days', 'last14days', 'last30days', 'thisweek', 'lastweek', 'thismonth', 'lastmonth', 'customrange'];
+  if (req.query.range && _.indexOf(params, req.query.range) !== -1) {
+    MongoDB.get(req.query.range, req.query.start, req.query.end).then(function(data) {
+      res.json(data);
+    }).catch(err => next(err));
+  } else {
+    return next('Incorrect Params');
+  }
 });
+
 app.get('/webhook', (req, res, next) => {
   const sep = ' by ';
   let data = {
@@ -57,9 +62,7 @@ const server = app.listen(process.env.PORT || 8080, () => {
 });
 
 function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-vars
-  res.status(500).send('error', {
-    error: err
-  });
+  res.status(500).send(err);
 }
 
 function formatOutput(track) {
