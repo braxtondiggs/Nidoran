@@ -46,6 +46,7 @@ app.get('/webhook', (req, res, next) => {
         if (err) return next(err);
         track.genres = artist.genres;
         const output = formatOutput(track);
+        output.query = data.formatted;
         MongoDB.save(output).then(() => {
           res.json(output);
         }).catch(err => next(err));
