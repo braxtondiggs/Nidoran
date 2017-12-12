@@ -14,7 +14,7 @@ module.exports.save = function(track) {
             });
           } else {
             db.close();
-            reject('Duplicate');
+            return resolve('Duplicate');
           }
         });
       } else {
