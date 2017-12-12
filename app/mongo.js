@@ -4,7 +4,7 @@ const _ = require('lodash');
 module.exports.save = function(track) {
   return new Promise((resolve, reject) => {
     MongoClient.connect(process.env.MONGODB_URI, (err, db) => {
-      if (!err && !_.isEmpty(track)) {
+      if (!err && !_.isEmpty(track) && isNotLast(db, track)) {
         db.collection('Tracks').insert(track, (err, result) => {
           db.close();
           if (err) return reject(err);
@@ -43,3 +43,12 @@ module.exports.get = function(range, start, end) {
     });
   });
 };
+
+function isNotLast(db, track) {
+  return db.collection('Tracks').find().sort({
+    $natural: -1
+  }).limit(1).toArray((err, result) => {
+    if (err) return false;
+    return _.first(result).id !== track.id;
+  });
+}
