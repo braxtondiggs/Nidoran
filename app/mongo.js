@@ -4,11 +4,18 @@ const _ = require('lodash');
 module.exports.save = function(track) {
   return new Promise((resolve, reject) => {
     MongoClient.connect(process.env.MONGODB_URI, (err, db) => {
-      if (!err && !_.isEmpty(track) && isNotLast(db, track)) {
-        db.collection('Tracks').insert(track, (err, result) => {
-          db.close();
-          if (err) return reject(err);
-          return resolve(result);
+      if (!err && !_.isEmpty(track)) {
+        isNotLast(db, track).then(status => {
+          if (status) {
+            db.collection('Tracks').insert(track, (err, result) => {
+              db.close();
+              if (err) return reject(err);
+              return resolve(result);
+            });
+          } else {
+            db.close();
+            reject('Duplicate');
+          }
         });
       } else {
         db.close();
@@ -45,10 +52,12 @@ module.exports.get = function(range, start, end) {
 };
 
 function isNotLast(db, track) {
-  return db.collection('Tracks').find().sort({
-    $natural: -1
-  }).limit(1).toArray((err, result) => {
-    if (err) return false;
-    return _.first(result).id !== track.id;
+  return new Promise((resolve, reject) => {
+    db.collection('Tracks').find().sort({
+      $natural: -1
+    }).limit(1).toArray((err, result) => {
+      if (err) return reject();
+      return resolve(_.first(result).id !== track.id);
+    });
   });
 }
