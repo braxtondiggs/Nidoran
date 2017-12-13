@@ -31,10 +31,9 @@ app.get('/', (req, res, next) => {
 app.post('/webhook', (req, res, next) => {
   const sep = ' by ';
   let data = {
-    url: req.body.data
+    formatted: req.body.data
   };
-  if (data.url && _.includes(data.url, sep)) {
-    data.formatted = decodeURIComponent(data.url);
+  if (data.formatted && _.includes(data.formatted, sep)) {
     let index = data.formatted.lastIndexOf(sep);
     data.track = data.formatted.substring(0, index);
     data.artist = data.formatted.substring(index + 4);
