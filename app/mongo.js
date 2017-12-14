@@ -1,3 +1,5 @@
+'use strict';
+
 const MongoClient = require('mongodb').MongoClient;
 const Utils = require('./utils.js');
 const _ = require('lodash');
@@ -27,6 +29,8 @@ module.exports.save = function(track) {
 
 module.exports.get = function(range, start, end) {
   return new Promise((resolve, reject) => {
+    const params = ['yesterday', 'last7days', 'last14days', 'last30days', 'thisweek', 'lastweek', 'thismonth', 'lastmonth', 'customrange'];
+    range = _.indexOf(params, range) !== -1 ? range : 'thismonth';
     MongoClient.connect(process.env.MONGODB_URI, (err, db) => {
       if (!err) {
         let date = Utils.calcRange(range, start, end);

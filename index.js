@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -6,6 +8,7 @@ const moment = require('moment');
 const _ = require('lodash');
 const app = express();
 const MongoDB = require('./app/mongo.js');
+const APIEndPoint = require('./app/api/api.controller.js');
 let spotify = new Spotify({
   id: process.env.SPOTIFY_ID,
   secret: process.env.SPOTIFY_SECRET
@@ -18,16 +21,13 @@ app.use(errorHandler);
 app.use(cors());
 
 app.get('/', (req, res, next) => {
-  const params = ['yesterday', 'last7days', 'last14days', 'last30days', 'thisweek', 'lastweek', 'thismonth', 'lastmonth', 'customrange'];
-  if (req.query.range && _.indexOf(params, req.query.range) !== -1) {
-    MongoDB.get(req.query.range, req.query.start, req.query.end).then(function(data) {
-      res.json(data);
+  MongoDB.get(req.query.range, req.query.start, req.query.end).then(data => {
+    APIEndPoint.topArtist(data).then(response => {
+      res.json(response);
     }).catch(err => next(err));
-  } else {
-    return next('Incorrect Params');
-  }
+  }).catch(err => next(err));
 });
-
+app.use('/api', require('./app/api'));
 app.post('/webhook', (req, res, next) => {
   const sep = ' by ';
   let data = {

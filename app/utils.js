@@ -1,3 +1,5 @@
+'use strict';
+
 const moment = require('moment');
 module.exports.calcRange = function(range, start, end) {
   let date = {
