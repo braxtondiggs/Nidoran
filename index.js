@@ -20,14 +20,24 @@ app.use(bodyParser.json());
 app.use(errorHandler);
 app.use(cors());
 
+app.use('/api', require('./app/api'));
+
 app.get('/', (req, res, next) => {
   MongoDB.get(req.query.range, req.query.start, req.query.end).then(data => {
-    APIEndPoint.topArtist(data).then(response => {
-      res.json(response);
+    Promise.all([
+      APIEndPoint.topArtists(data),
+      APIEndPoint.topTracks(data),
+      APIEndPoint.totalDuration(data)
+    ]).then(([artists, tracks, duration]) => {
+      res.json({
+        artists,
+        tracks,
+        duration
+      });
     }).catch(err => next(err));
   }).catch(err => next(err));
 });
-app.use('/api', require('./app/api'));
+
 app.post('/webhook', (req, res, next) => {
   const sep = ' by ';
   let data = {
