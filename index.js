@@ -26,11 +26,13 @@ app.get('/', (req, res, next) => {
   MongoDB.get(req.query.range, req.query.start, req.query.end).then(data => {
     Promise.all([
       APIEndPoint.topArtists(data),
+      APIEndPoint.topGenres(data),
       APIEndPoint.topTracks(data),
       APIEndPoint.totalDuration(data)
-    ]).then(([artists, tracks, duration]) => {
+    ]).then(([artists, genres, tracks, duration]) => {
       res.json({
         artists,
+        genres,
         tracks,
         duration
       });
