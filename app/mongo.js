@@ -10,8 +10,8 @@ module.exports.save = function(track, artist) {
         isNotLast(track).then(status => {
           if (status) {
             Promise.all([
-              db.collection('Tracks').insert(track, (err, result) => err ? reject(err) : resolve(result)), // eslint-disable-line no-confusing-arrow
-              db.collection('Artist').insert(artist, (err, result) => err ? reject(err) : resolve(result)) // eslint-disable-line no-confusing-arrow
+              db.collection('Tracks').insert(track, (err, result) => err ? reject(err) : resolve(result)),
+              db.collection('Artist').updateOne({ id: artist.id }, artist, { upsert: true }, (err, result) => err ? reject(err) : resolve(result))
             ]).then(result => resolve(result)).catch(err => reject(err));
           } else {
             db.close();
