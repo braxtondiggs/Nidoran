@@ -59,7 +59,7 @@ app.post('/webhook', (req, res, next) => {
         track.genres = artist.genres;
         const output = formatOutput(track);
         output.query = data.formatted;
-        MongoDB.save(output).then(() => {
+        MongoDB.save(output, formatArtist(artist)).then(() => {
           res.json(output);
         }).catch(err => next(err));
       });
@@ -88,5 +88,14 @@ function formatOutput(track) {
     duration: track.duration_ms,
     artist: _.map(track.artists, 'name'),
     image: track.album.images[0].url
+  };
+}
+
+function formatArtist(artist) {
+  return {
+    id: artist.id,
+    name: artist.name,
+    externalURL: artist.external_urls.spotify,
+    image: _.first(artist.images).url
   };
 }

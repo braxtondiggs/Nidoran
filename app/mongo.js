@@ -3,17 +3,16 @@
 const MongoClient = require('mongodb').MongoClient;
 const Utils = require('./utils.js');
 const _ = require('lodash');
-module.exports.save = function(track) {
+module.exports.save = function(track, artist) {
   return new Promise((resolve, reject) => {
     MongoClient.connect(process.env.MONGODB_URI, (err, db) => {
       if (!err && !_.isEmpty(track)) {
         isNotLast(track).then(status => {
           if (status) {
-            db.collection('Tracks').insert(track, (err, result) => {
-              db.close();
-              if (err) return reject(err);
-              return resolve(result);
-            });
+            Promise.all([
+              db.collection('Tracks').insert(track, (err, result) => err ? reject(err) : resolve(result)), // eslint-disable-line no-confusing-arrow
+              db.collection('Artist').insert(artist, (err, result) => err ? reject(err) : resolve(result)) // eslint-disable-line no-confusing-arrow
+            ]).then(result => resolve(result)).catch(err => reject(err));
           } else {
             db.close();
             return resolve('Duplicate');
