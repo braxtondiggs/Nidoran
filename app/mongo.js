@@ -63,7 +63,7 @@ module.exports.last = function() {
           $natural: -1
         }).limit(1).toArray((err, result) => {
           if (err) return reject();
-          resolve(result);
+          return resolve(result);
         });
       } else {
         db.close();
@@ -75,6 +75,6 @@ module.exports.last = function() {
 
 function isNotLast(track) {
   return new Promise((resolve, reject) => {
-    this.last.then(result => resolve(_.first(result).id !== track.id)).catch(err => reject(err));
+    exports.last().then(result => resolve(_.first(result).id !== track.id)).catch(err => reject(err));
   });
 }
