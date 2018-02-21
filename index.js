@@ -9,6 +9,8 @@ const _ = require('lodash');
 const app = express();
 const MongoDB = require('./app/mongo.js');
 const APIEndPoint = require('./app/api/api.controller.js');
+const io = require('socket.io-client');
+const socket = io.connect('https://braxtondiggs.com', { transports: ['websocket', 'polling'] });
 let spotify = new Spotify({
   id: process.env.SPOTIFY_ID,
   secret: process.env.SPOTIFY_SECRET
@@ -62,6 +64,9 @@ app.post('/webhook', (req, res, next) => {
         const output = formatOutput(track);
         output.query = data.formatted;
         MongoDB.save(output, formatArtist(artist)).then(() => {
+          const socketPacket = output;
+          socketPacket.artist = formatArtist(artist);
+          socket.emit('track', socketPacket);
           res.json(output);
         }).catch(err => next(err));
       });
