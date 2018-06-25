@@ -8,6 +8,7 @@ const moment = require('moment');
 const _ = require('lodash');
 const app = express();
 const MongoDB = require('./app/mongo.js');
+const { dialogflow, BasicCard, Button, Image } = require('actions-on-google');
 const APIEndPoint = require('./app/api/api.controller.js');
 const io = require('socket.io-client');
 const socket = io.connect('https://braxtondiggs.com', { transports: ['websocket', 'polling'] });
@@ -18,7 +19,8 @@ let spotify = new Spotify({
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-app.use(bodyParser.json());
+const googleActions = dialogflow();
+app.use(bodyParser.json(), googleActions);
 app.use(errorHandler);
 app.use(cors());
 
@@ -106,3 +108,18 @@ function formatArtist(artist) {
     image: _.first(artist.images).url
   };
 }
+
+googleActions.intent('Last Track', async conv => {
+  const data = await MongoDB.last();
+  conv.close(new BasicCard({
+    title: `The last song played was ${data[0].query}`,
+    image: new Image({
+      url: data[0].image,
+      alt: data[0].artist[0]
+    }),
+    buttons: new Button({
+      title: data[0].query,
+      url: data[0].externalURL
+    })
+  }));
+});

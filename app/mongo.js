@@ -56,22 +56,11 @@ module.exports.get = function(range, start, end) {
   });
 };
 
-module.exports.last = function() {
-  return new Promise((resolve, reject) => {
-    MongoClient.connect(process.env.MONGODB_URI, (err, db) => {
-      if (err) {
-        db.close();
-        return reject(err);
-      }
-      db.collection('Tracks').find().sort({
-        $natural: -1
-      }).limit(1).toArray((err, result) => {
-        db.close();
-        if (err) return reject(err);
-        return resolve(result);
-      });
-    });
-  });
+module.exports.last = async function() {
+  const db = await MongoClient.connect(process.env.MONGODB_URI);
+  return await db.collection('Tracks').find().sort({
+    $natural: -1
+  }).limit(1).toArray();
 };
 
 module.exports.getArtistImage = function(artist) {
