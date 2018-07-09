@@ -21,8 +21,8 @@ export class WebHookController {
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.mapped() });
     }
-    const data: any = matchedData(req);
-    const split = _.split(data.data, ' by ', 2);
+    const response: any = matchedData(req);
+    const split = _.split(response.data, ' by ', 2);
     try {
       const search = await spotify.search({
         limit: 1,
@@ -41,7 +41,7 @@ export class WebHookController {
         id: track.id,
         image: track.album.images[0].url,
         name: track.name,
-        query: data.data
+        query: response.data
       } as ITrack;
 
       const oArtist = {
