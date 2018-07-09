@@ -1,5 +1,6 @@
 'use strict';
 import { BasicCard, Button, DialogflowConversation, Image, SimpleResponse } from 'actions-on-google';
+import * as moment from 'moment';
 import { Utils } from '../utils';
 
 export class GoogleIntents {
@@ -13,8 +14,8 @@ export class GoogleIntents {
       const track = await this.utils.getLastTrack();
       if (track) {
         conv.close(new SimpleResponse({
-          speech: `The last song played was ${track.query}`,
-          text: `The last song played was ${track.query}`
+          speech: `The last song played was ${track.query} ${moment(track.created).fromNow()}`,
+          text: `The last song played was ${track.query} ${moment(track.created).fromNow()}`
         }));
         conv.close(new BasicCard({
           buttons: new Button({
@@ -25,6 +26,7 @@ export class GoogleIntents {
             alt: track.artist[0],
             url: track.image
           }),
+          subtitle: moment(track.created).fromNow(),
           title: `The last song played was ${track.query}`
         }));
       }
