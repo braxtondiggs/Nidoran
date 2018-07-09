@@ -22,12 +22,13 @@ class App {
     this.express.use(cors());
     this.express.use(helmet());
     this.express.options('*', cors());
-    this.express.use(bodyParser.json(), this.flow);
+    this.express.use(bodyParser.json());
   }
 
   private routes(): void {
     this.express.use('/api', EndpointRouter);
     this.express.use('/webhook', WebHookRouter);
+    this.express.use('/intents', this.flow);
   }
 }
 export default new App().express;

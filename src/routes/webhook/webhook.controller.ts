@@ -22,7 +22,7 @@ export class WebHookController {
       return res.status(422).json({ errors: errors.mapped() });
     }
     const data: any = matchedData(req);
-    const split = _.split(data, ' by ', 2);
+    const split = _.split(data.data, ' by ', 2);
     try {
       const search = await spotify.search({
         limit: 1,
@@ -41,7 +41,7 @@ export class WebHookController {
         id: track.id,
         image: track.album.images[0].url,
         name: track.name,
-        query: data.formatted
+        query: data.data
       } as ITrack;
 
       const oArtist = {
@@ -50,8 +50,8 @@ export class WebHookController {
         image: artist.images[0].url,
         name: artist.name
       } as IArtist;
-
-      if (await this.isNotLast(oTrack)) {
+      const lastTrack: ITrack = await this.utils.getLastTrack();
+      if (track.id !== lastTrack.id) {
         await Track.create(oTrack);
         await Artist.update({}, oArtist, { multi: false });
       }
@@ -59,11 +59,6 @@ export class WebHookController {
     } catch (error) {
       next(error);
     }
-  }
-
-  private async isNotLast(track: ITrack): Promise<boolean> {
-    const lastTrack: ITrack = await this.utils.getLastTrack();
-    return track.id !== lastTrack.id;
   }
 }
 

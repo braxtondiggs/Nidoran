@@ -5,6 +5,10 @@ import { Utils } from '../utils';
 export class GoogleIntents {
   private utils: Utils = new Utils();
   constructor(actions: any) {
+    this.lastTrack(actions);
+  }
+
+  private lastTrack(actions: any) {
     actions.intent('Last Track', async (conv: DialogflowConversation) => {
       const track = await this.utils.getLastTrack();
       if (track) {
