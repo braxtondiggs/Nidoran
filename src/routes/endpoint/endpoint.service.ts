@@ -10,7 +10,7 @@ export class EndpointService {
     const tracks: ITrack[] = await this.utils.getTracks(range, start, end);
     const duration: number = _.chain(tracks).map('duration').sum().value();
     return {
-      formatted: humanizeDuration(duration, { round: true, delimiter: 'and' }),
+      formatted: humanizeDuration(duration, { round: true, delimiter: ' and ' }),
       value: duration
     };
   }
@@ -34,7 +34,10 @@ export class EndpointService {
     });
     const response: any = await Promise.all(promises);
     _.forEach(response, (artist: IArtist, key: number) => {
-      artists[key].image = artist.image;
+      if (artist) {
+        artists[key].image = artist.image;
+        artists[key].externalURL = artist.externalURL;
+      }
     });
     return artists;
   }

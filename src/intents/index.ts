@@ -1,8 +1,9 @@
 'use strict';
 import { BasicCard, Button, DialogflowConversation, Image, List, SimpleResponse } from 'actions-on-google';
+import * as _ from 'lodash';
 import * as moment from 'moment';
 import { EndpointService } from '../routes/endpoint/endpoint.service';
-import { ITrack } from '../schemas';
+import { IArtist, ITrack } from '../schemas';
 import { Utils } from '../utils';
 
 export class GoogleIntents {
@@ -11,6 +12,7 @@ export class GoogleIntents {
   constructor(actions: any) {
     this.lastTrack(actions);
     this.totalDuration(actions);
+    this.topArtists(actions);
   }
 
   private lastTrack(actions: any) {
@@ -37,14 +39,36 @@ export class GoogleIntents {
   }
 
   private totalDuration(actions: any) {
-    actions.intent('Total Duration', async (conv: DialogflowConversation) => {
-      const duration = await this.service.totalDuration('thismonth', '', '');
+    actions.intent('Total Duration', async (conv: DialogflowConversation, response: any) => {
+      const duration = await this.service.totalDuration(_.replace(response.range, ' ', ''), '', '');
       conv.close(new SimpleResponse({
-        speech: `Total music listened to this month is ${duration.formatted}`,
-        text: `Total music listened to this month is ${duration.formatted}`
+        speech: `Total music listened to ${response.range} is ${duration.formatted}`,
+        text: `Total music listened to ${response.range} is ${duration.formatted}`
       }));
     });
   }
+
+  private topArtists(actions: any) {
+    actions.intent('Top Artists', async (conv: DialogflowConversation, response: any) => {
+      const artists: IArtist[] = await this.service.topArtists(_.replace(response.range, ' ', ''), '', '');
+      const items = _.zipObject(_.map(artists, 'name'), _.map(artists, (artist: IArtist) => ({
+        description: `Total plays: ${artist.count}`,
+        image: new Image({
+          alt: artist.name,
+          url: artist.image
+        }),
+        title: artist.name
+      })));
+      conv.close(new SimpleResponse({
+        speech: `Your top artists ${response.range} is ${artists[0].name}`
+      }));
+      conv.close(new List({
+        items,
+        title: 'Top Artist'
+      }));
+    });
+  }
+
 }
 
 export default GoogleIntents;

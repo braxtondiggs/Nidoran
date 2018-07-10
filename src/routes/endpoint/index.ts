@@ -1,5 +1,6 @@
 'use strict';
 import { Router } from 'express';
+import { check } from 'express-validator/check';
 import EndpointController from './endpoint.controller';
 
 export class EndpointRouter {
@@ -14,23 +15,28 @@ export class EndpointRouter {
   }
 
   private totalDuration() {
-    this.router.get('/totalDuration', [], EndpointController.totalDuration.bind(EndpointController));
+    this.router.get('/totalDuration', [check(['range', 'start', 'end'])],
+      EndpointController.totalDuration.bind(EndpointController));
   }
 
   private topArtists() {
-    this.router.get('/topArtists', [], EndpointController.topArtists.bind(EndpointController));
+    this.router.get('/topArtists', [check(['range', 'start', 'end'])],
+      EndpointController.topArtists.bind(EndpointController));
   }
 
   private topGenres() {
-    this.router.get('/topGenres', [], EndpointController.topGenres.bind(EndpointController));
+    this.router.get('/topGenres', [check(['range', 'start', 'end'])],
+      EndpointController.topGenres.bind(EndpointController));
   }
 
   private topTracks() {
-    this.router.get('/topTracks', [], EndpointController.topTracks.bind(EndpointController));
+    this.router.get('/topTracks', [check(['range', 'start', 'end'])],
+      EndpointController.topTracks.bind(EndpointController));
   }
 
   private lastTrack() {
-    this.router.get('/lastTrack', [], EndpointController.lastTrack.bind(EndpointController));
+    this.router.get('/lastTrack', [check(['range', 'start', 'end'])],
+      EndpointController.lastTrack.bind(EndpointController));
   }
 }
 
