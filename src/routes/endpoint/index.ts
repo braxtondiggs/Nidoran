@@ -1,15 +1,11 @@
 'use strict';
 import { Router } from 'express';
-import { Utils } from '../../utils';
 import EndpointController from './endpoint.controller';
 
 export class EndpointRouter {
   public router: Router;
-  public utils: Utils;
-
   constructor() {
     this.router = Router();
-    this.utils = new Utils();
     this.totalDuration();
     this.topArtists();
     this.topGenres();
@@ -18,23 +14,23 @@ export class EndpointRouter {
   }
 
   private totalDuration() {
-    this.router.get('/totalDuration', [], EndpointController.totalDuration.bind(this));
+    this.router.get('/totalDuration', [], EndpointController.totalDuration.bind(EndpointController));
   }
 
   private topArtists() {
-    this.router.get('/topArtists', [], EndpointController.topArtists.bind(this));
+    this.router.get('/topArtists', [], EndpointController.topArtists.bind(EndpointController));
   }
 
   private topGenres() {
-    this.router.get('/topGenres', [], EndpointController.topGenres.bind(this));
+    this.router.get('/topGenres', [], EndpointController.topGenres.bind(EndpointController));
   }
 
   private topTracks() {
-    this.router.get('/topTracks', [], EndpointController.topTracks.bind(this));
+    this.router.get('/topTracks', [], EndpointController.topTracks.bind(EndpointController));
   }
 
   private lastTrack() {
-    this.router.get('/lastTrack', [], EndpointController.lastTrack.bind(this));
+    this.router.get('/lastTrack', [], EndpointController.lastTrack.bind(EndpointController));
   }
 }
 

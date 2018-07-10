@@ -1,21 +1,24 @@
 'use strict';
-import { BasicCard, Button, DialogflowConversation, Image, SimpleResponse } from 'actions-on-google';
+import { BasicCard, Button, DialogflowConversation, Image, List, SimpleResponse } from 'actions-on-google';
 import * as moment from 'moment';
+import { EndpointService } from '../routes/endpoint/endpoint.service';
+import { ITrack } from '../schemas';
 import { Utils } from '../utils';
 
 export class GoogleIntents {
   private utils: Utils = new Utils();
+  private service: EndpointService = new EndpointService();
   constructor(actions: any) {
     this.lastTrack(actions);
+    this.totalDuration(actions);
   }
 
   private lastTrack(actions: any) {
     actions.intent('Last Track', async (conv: DialogflowConversation) => {
-      const track = await this.utils.getLastTrack();
+      const track: ITrack | null = await this.utils.getLastTrack();
       if (track) {
         conv.close(new SimpleResponse({
-          speech: `The last song played was ${track.query} ${moment(track.created).fromNow()}`,
-          text: `The last song played was ${track.query} ${moment(track.created).fromNow()}`
+          speech: `The last song played was ${track.query} ${moment(track.created).fromNow()}`
         }));
         conv.close(new BasicCard({
           buttons: new Button({
@@ -27,9 +30,19 @@ export class GoogleIntents {
             url: track.image
           }),
           subtitle: moment(track.created).fromNow(),
-          title: `The last song played was ${track.query}`
+          title: track.query
         }));
       }
+    });
+  }
+
+  private totalDuration(actions: any) {
+    actions.intent('Total Duration', async (conv: DialogflowConversation) => {
+      const duration = await this.service.totalDuration('thismonth', '', '');
+      conv.close(new SimpleResponse({
+        speech: `Total music listened to this this month ${duration.formatted}`,
+        text: `Total music listened to this this month ${duration.formatted}`
+      }));
     });
   }
 }
