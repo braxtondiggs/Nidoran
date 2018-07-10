@@ -40,8 +40,8 @@ export class GoogleIntents {
     actions.intent('Total Duration', async (conv: DialogflowConversation) => {
       const duration = await this.service.totalDuration('thismonth', '', '');
       conv.close(new SimpleResponse({
-        speech: `Total music listened to this this month ${duration.formatted}`,
-        text: `Total music listened to this this month ${duration.formatted}`
+        speech: `Total music listened to this month is ${duration.formatted}`,
+        text: `Total music listened to this month is ${duration.formatted}`
       }));
     });
   }

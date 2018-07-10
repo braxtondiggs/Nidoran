@@ -10,7 +10,7 @@ export class EndpointService {
     const tracks: ITrack[] = await this.utils.getTracks(range, start, end);
     const duration: number = _.chain(tracks).map('duration').sum().value();
     return {
-      formatted: humanizeDuration(duration, { round: true }),
+      formatted: humanizeDuration(duration, { round: true, delimiter: 'and' }),
       value: duration
     };
   }

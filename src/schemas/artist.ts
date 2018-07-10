@@ -30,8 +30,6 @@ export const ArtistSchema: Schema = new Schema({
     required: true,
     type: String
   }
-}, {
-    timestamps: true
-  });
+});
 
 export const Artist: Model<IArtist> = model<IArtist>('Artist', ArtistSchema, 'Artist');
