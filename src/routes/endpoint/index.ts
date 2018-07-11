@@ -12,6 +12,7 @@ export class EndpointRouter {
     this.topGenres();
     this.topTracks();
     this.lastTrack();
+    this.index();
   }
 
   private totalDuration() {
@@ -37,6 +38,11 @@ export class EndpointRouter {
   private lastTrack() {
     this.router.get('/lastTrack', [check(['range', 'start', 'end'])],
       EndpointController.lastTrack.bind(EndpointController));
+  }
+
+  private index() {
+    this.router.get('/', [check(['range', 'start', 'end'])],
+      EndpointController.all.bind(EndpointController));
   }
 }
 

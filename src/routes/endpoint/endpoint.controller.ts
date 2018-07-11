@@ -1,11 +1,8 @@
 'use strict';
 import { Request, Response } from 'express';
 import { matchedData } from 'express-validator/filter';
-import { connect } from 'mongoose';
 import { Utils } from '../../utils';
 import { EndpointService } from './endpoint.service';
-
-connect(process.env.MONGODB_URI as string);
 
 export class EndpointController {
   private utils: Utils = new Utils();
@@ -33,6 +30,17 @@ export class EndpointController {
 
   public async lastTrack(req: Request, res: Response) {
     res.json(await this.utils.getLastTrack());
+  }
+
+  public async all(req: Request, res: Response) {
+    const query: any = matchedData(req, { locations: ['query'] });
+    res.json({
+      artists: await this.service.topArtists(query.range, query.start, query.end),
+      duration: await this.service.totalDuration(query.range, query.start, query.end),
+      genres: await this.service.topGenres(query.range, query.start, query.end),
+      last: await this.utils.getLastTrack(),
+      tracks: await this.service.topTracks(query.range, query.start, query.end)
+    });
   }
 }
 
