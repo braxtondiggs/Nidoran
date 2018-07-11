@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 export class EndpointService {
   private utils: Utils = new Utils();
 
-  public async totalDuration(range: string, start: string, end: string): Promise<{ formatted: string, value: number }> {
+  public async totalDuration(range: string, start?: string, end?: string): Promise<{ formatted: string, value: number }> {
     const tracks: ITrack[] = await this.utils.getTracks(range, start, end);
     const duration: number = _.chain(tracks).map('duration').sum().value();
     return {
@@ -15,7 +15,7 @@ export class EndpointService {
     };
   }
 
-  public async topArtists(range: string, start: string, end: string): Promise<IArtist[]> {
+  public async topArtists(range: string, start?: string, end?: string): Promise<IArtist[]> {
     const tracks: ITrack[] = await this.utils.getTracks(range, start, end);
     const artists: IArtist[] = _.chain(tracks)
       .map('artist')
@@ -42,7 +42,7 @@ export class EndpointService {
     return artists;
   }
 
-  public async topGenres(range: string, start: string, end: string): Promise<Array<{ count: number, name: string }>> {
+  public async topGenres(range: string, start?: string, end?: string): Promise<Array<{ count: number, name: string }>> {
     const tracks: ITrack[] = await this.utils.getTracks(range, start, end);
     return _.chain(tracks)
       .map('genres')
@@ -57,7 +57,7 @@ export class EndpointService {
       .value();
   }
 
-  public async topTracks(range: string, start: string, end: string): Promise<ITrack[]> {
+  public async topTracks(range: string, start?: string, end?: string): Promise<ITrack[]> {
     const tracks: ITrack[] = await this.utils.getTracks(range, start, end);
     return _.chain(tracks)
       .groupBy('id')

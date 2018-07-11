@@ -5,9 +5,8 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 
 export class Utils {
-  public calcRange(range: string, start: string, end: string): { end: string, start: string } {
-    const params = ['yesterday', 'last7days', 'last14days', 'last30days', 'thisweek',
-      'lastweek', 'thismonth', 'lastmonth', 'customrange'];
+  public calcRange(range: string, start?: string, end?: string): { end: string, start: string } {
+    const params = ['yesterday', 'last7days', 'last14days', 'last30days', 'thisweek', 'lastweek', 'thismonth', 'lastmonth', 'customrange'];
     range = _.indexOf(params, range) !== -1 ? range : 'thismonth';
     const date = {
       end: moment().toISOString(),
@@ -50,7 +49,7 @@ export class Utils {
     return date;
   }
 
-  public async getTracks(range: string, start: string, end: string): Promise<ITrack[]> {
+  public async getTracks(range: string, start?: string, end?: string): Promise<ITrack[]> {
     const date = this.calcRange(range, start, end);
     return await Track.find({
       created: {

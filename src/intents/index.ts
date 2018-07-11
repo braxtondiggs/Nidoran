@@ -13,6 +13,8 @@ export class GoogleIntents {
     this.lastTrack(actions);
     this.totalDuration(actions);
     this.topArtists(actions);
+    this.topGenres(actions);
+    this.topTracks(actions);
   }
 
   private lastTrack(actions: any) {
@@ -40,7 +42,7 @@ export class GoogleIntents {
 
   private totalDuration(actions: any) {
     actions.intent('Total Duration', async (conv: DialogflowConversation, response: any) => {
-      const duration = await this.service.totalDuration(_.replace(response.range, ' ', ''), '', '');
+      const duration = await this.service.totalDuration(_.replace(response.range, ' ', ''));
       conv.close(new SimpleResponse({
         speech: `Total music listened to ${response.range} is ${duration.formatted}`,
         text: `Total music listened to ${response.range} is ${duration.formatted}`
@@ -50,7 +52,7 @@ export class GoogleIntents {
 
   private topArtists(actions: any) {
     actions.intent('Top Artists', async (conv: DialogflowConversation, response: any) => {
-      const artists: IArtist[] = await this.service.topArtists(_.replace(response.range, ' ', ''), '', '');
+      const artists: IArtist[] = await this.service.topArtists(_.replace(response.range, ' ', ''));
       const items = _.zipObject(_.map(artists, 'name'), _.map(artists, (artist: IArtist) => ({
         description: `Total plays: ${artist.count}`,
         image: new Image({
@@ -65,6 +67,39 @@ export class GoogleIntents {
       conv.close(new List({
         items,
         title: 'Top Artist'
+      }));
+    });
+  }
+
+  private topGenres(actions: any) {
+    actions.intent('Top Genres', async (conv: DialogflowConversation, response: any) => {
+      const limit = 5;
+      const topGenres = await this.service.topGenres(_.replace(response.range, ' ', ''));
+      const genres = _.chain(topGenres).slice(0, limit).map((o, i) => (i !== limit) ? o.name : `and ${o.name}`).join(', ').value();
+      conv.close(new SimpleResponse({
+        speech: `Your top ${limit} genres ${response.range} is ${genres}`,
+        text: `Your top ${limit} genres ${response.range} is ${genres}`
+      }));
+    });
+  }
+
+  private topTracks(actions: any) {
+    actions.intent('Top Tracks', async (conv: DialogflowConversation, response: any) => {
+      const tracks: ITrack[] = await this.service.topTracks(_.replace(response.range, ' ', ''));
+      const items = _.zipObject(_.map(tracks, '_id'), _.map(tracks, (track: ITrack) => ({
+        description: `Total plays: ${track.count}`,
+        image: new Image({
+          alt: track.name,
+          url: track.image
+        }),
+        title: track.query
+      })));
+      conv.close(new SimpleResponse({
+        speech: `Your top track ${response.range} is ${tracks[0].query}`
+      }));
+      conv.close(new List({
+        items,
+        title: 'Top Tracks'
       }));
     });
   }
