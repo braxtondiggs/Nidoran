@@ -53,7 +53,7 @@ export class WebHookController {
       const lastTrack: ITrack = await this.utils.getLastTrack();
       if (track.id !== lastTrack.id) {
         await Track.create(oTrack);
-        await Artist.update({}, oArtist, { multi: false });
+        await Artist.findOneAndUpdate({ id: oArtist.id }, oArtist, { upsert: true });
       }
       res.json(oTrack);
     } catch (error) {
