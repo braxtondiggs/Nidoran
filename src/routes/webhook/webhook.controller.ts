@@ -5,6 +5,7 @@ import { matchedData } from 'express-validator/filter';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { connect } from 'mongoose';
+import * as io from 'socket.io-client';
 import { Artist, IArtist, ITrack, Track } from '../../schemas';
 
 const Spotify = require('node-spotify-api');
@@ -12,6 +13,7 @@ const spotify = new Spotify({
   id: process.env.SPOTIFY_ID,
   secret: process.env.SPOTIFY_SECRET
 });
+const socket = io('https://braxtondiggs.com', { transports: ['websocket', 'polling'] });
 connect(process.env.MONGODB_URI as string);
 
 export class WebHookController {
@@ -54,6 +56,7 @@ export class WebHookController {
       if (track.id !== lastTrack.id) {
         await Track.create(oTrack);
         await Artist.findOneAndUpdate({ id: oArtist.id }, oArtist, { upsert: true });
+        socket.emit('track', { track: oTrack, artist: oArtist });
       }
       res.json(oTrack);
     } catch (error) {
