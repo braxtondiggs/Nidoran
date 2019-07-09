@@ -56,7 +56,7 @@ export class WebHookController {
       if (track.id !== lastTrack.id) {
         await Track.create(oTrack);
         await Artist.findOneAndUpdate({ id: oArtist.id }, oArtist, { upsert: true });
-        socket.emit('track', { track: oTrack, artist: oArtist });
+        socket.emit('track', oTrack);
       }
       res.json(oTrack);
     } catch (error) {
