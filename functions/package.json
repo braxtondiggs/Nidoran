@@ -1,0 +1,41 @@
+{
+  "name": "nidoran",
+  "version": "3.0.0",
+  "description": "Integration with Pixel Ambient Services - Now Playing",
+  "private": true,
+  "homepage": "http://braxtondiggs.com",
+  "author": {
+    "name": "Braxton Diggs",
+    "email": "braxtondiggs@gmail.com"
+  },
+  "repository": "braxtondiggs/nidoran",
+  "main": "lib/index.js",
+  "scripts": {
+    "lint": "./node_modules/.bin/tslint -p tsconfig.json",
+    "build": "./node_modules/.bin/tsc",
+    "serve": "npm run build && firebase serve --only functions",
+    "shell": "npm run build && firebase experimental:functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "functions": {
+    "predeploy": "npm --prefix functions run build"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "firebase-admin": "^8.2.0",
+    "firebase-functions": "^3.1.0",
+    "moment": "^2.24.0",
+    "node-spotify-api": "git+https://github.com/ceckenrode/node-spotify-api.git#d7c3f95"
+  },
+  "devDependencies": {
+    "@types/express": "^4.0.37",
+    "tslint": "^5.8.0",
+    "typescript": "^3.5.3"
+  },
+  "engines": {
+    "node": "10"
+  }
+}
