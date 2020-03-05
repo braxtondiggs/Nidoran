@@ -1,18 +1,14 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "es2015"],
     "module": "commonjs",
-    "noImplicitReturns": false,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
-    "target": "es5",
-    "baseUrl": "./",
-    "paths": {
-      "*": ["./node_modules/@types/*", "*"]
-    }
+    "strict": true,
+    "target": "es2017",
+    "esModuleInterop": false
   },
   "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
