@@ -1,4 +1,4 @@
-package com.example.nidoran
+package com.cymbit.nidoran
 
 import io.flutter.embedding.android.FlutterActivity
 
