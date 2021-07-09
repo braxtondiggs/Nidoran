@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter_notification_listener/flutter_notification_listener.dart';
+import 'package:intl/intl.dart';
+import 'package:nidoran/db.dart';
+import 'package:nidoran/model.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,6 +39,7 @@ class NotificationsLog extends StatefulWidget {
 }
 
 class _NotificationsLogState extends State<NotificationsLog> {
+  final db = DatabaseService();
   List<NotificationEvent> _log = [];
   bool started = false;
   bool _loading = false;
@@ -125,33 +130,72 @@ class _NotificationsLogState extends State<NotificationsLog> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications Listener Example'),
+        title: Text('Nidoran'),
       ),
       body: Center(
-          child: ListView.builder(
-              itemCount: _log.length,
-              reverse: true,
-              itemBuilder: (BuildContext context, int idx) {
-                final entry = _log[idx];
-                return ListTile(
-                    trailing:
-                        Text(entry.packageName.toString().split('.').last),
-                    title: Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(entry.title ?? "<<no title>>"),
-                          Text(entry.createAt.toString().substring(0, 19)),
-                        ],
-                      ),
-                    ));
-              })),
+        child: StreamProvider<List<History>>.value(
+          value: db.streamHistory(),
+          initialData: [],
+          child: HistoryList(),
+        ),
+        /*Center(
+              child: ListView.builder(
+                  itemCount: _log.length,
+                  reverse: true,
+                  itemBuilder: (BuildContext context, int idx) {
+                    final entry = _log[idx];
+                    return ListTile(
+                        trailing:
+                            Text(entry.packageName.toString().split('.').last),
+                        title: Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(entry.title ?? "<<no title>>"),
+                              Text(entry.createAt.toString().substring(0, 19)),
+                            ],
+                          ),
+                        ));
+                  })),
       floatingActionButton: FloatingActionButton(
         onPressed: started ? stopListening : startListening,
         tooltip: 'Start/Stop sensing',
         child: _loading
             ? Icon(Icons.close)
-            : (started ? Icon(Icons.stop) : Icon(Icons.play_arrow)),
+            : (started ? Icon(Icons.stop) : Icon(Icons.play_arrow)),*/
+      ),
+    );
+  }
+}
+
+class HistoryList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var history = Provider.of<List<History>>(context);
+
+    return Container(
+      child: ListView(
+        children: history.map((item) {
+          return FutureBuilder<Track>(
+              future: item.track,
+              builder: (BuildContext context, AsyncSnapshot<Track> track) {
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                        '${track.data?.name} by ${track.data?.artist_name}'),
+                    subtitle: Text(
+                        DateFormat.yMEd().add_jm().format(item.date.toDate())),
+                  ),
+                );
+              });
+
+          /*Card(
+            child: ListTile(
+                // leading: Text(weapon.img, style: TextStyle(fontSize: 50)),
+                title: Text(tracl.),
+                subtitle: Text('Deals ${item.date} hitpoints of damage')),
+          );*/
+        }).toList(),
       ),
     );
   }

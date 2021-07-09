@@ -63,7 +63,6 @@ async function queryDuplicateHistory(trackId: string) {
     const snapshot = await db.collection('history').orderBy('date', 'desc').limit(1).get();
     snapshot.forEach(doc => data.push(doc.data()));
     return data[0].trackId === trackId && dayjs(data[0].date.toDate().getTime()).isAfter(dayjs().subtract(5, 'minute'));
-
 }
 
 async function querySpotify(data: string) {
@@ -81,6 +80,7 @@ async function querySpotify(data: string) {
     const track = query.tracks.items[0];
     const artists = [];
     for await (const artist of track.artists) {
+        if (await checkArtistExists(artist.id)) return;
         const { data: item } = await axios.get(`https://api.spotify.com/v1/artists/${artist.id}`, { headers: { 'Authorization': `Bearer ${SPOTIFYTOKEN}` } });
         artists.push(item);
     }
@@ -125,6 +125,11 @@ async function saveQuery(trackId: string, query: string) {
     });
 }
 
+async function checkArtistExists(artistId: string) {
+    const snapshot = await db.doc(`artists/${artistId}`).get();
+    return snapshot.exists;
+}
+
 async function saveArtist(artist: any) {
     await db.doc(`artists/${artist.id}`).set({
         genres: artist.genres,
@@ -148,6 +153,7 @@ async function saveTrack(track: any, artist: any) {
         track_number: track.track_number,
         url: track.external_urls?.spotify
     }, { merge: true });
+
     if (track.album) {
         const album = track.album;
         await db.doc(`albums/${album.id}`).set({
@@ -161,4 +167,5 @@ async function saveTrack(track: any, artist: any) {
         }, { merge: true })
     }
 }
+
 exports.endpoints = functions.https.onRequest(app);

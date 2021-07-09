@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "610200296096",
+    "firebase_url": "https://nidoran-4f077.firebaseio.com",
+    "project_id": "nidoran-4f077",
+    "storage_bucket": "nidoran-4f077.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:610200296096:android:ea74805317d8151e5907c5",
+        "android_client_info": {
+          "package_name": "com.cybmit.nidoran"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "610200296096-0en0lqm76u3f8npgpurmf1ijv8d3e4g2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnqflPxfLFXQul1PhYFbQxGf9Jzrk8UME"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "610200296096-0en0lqm76u3f8npgpurmf1ijv8d3e4g2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
