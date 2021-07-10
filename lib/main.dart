@@ -1,6 +1,7 @@
 import 'dart:isolate';
 import 'dart:ui';
 
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -10,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:nidoran/db.dart';
 import 'package:nidoran/model.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(MyApp());
@@ -70,11 +72,8 @@ class _NotificationsLogState extends State<NotificationsLog> {
     IsolateNameServer.registerPortWithName(port.sendPort, "_listener_");
     port.listen((message) => onData(message));
 
-    // don't use the default receivePort
-    // NotificationsListener.receivePort.listen((evt) => onData(evt));
-
     var isR = await NotificationsListener.isRunning;
-    print("""Service is ${!isR! ? "not " : ""}aleary running""");
+    print("""Service is ${!isR! ? "not " : ""} already running""");
 
     setState(() {
       started = isR;
@@ -164,13 +163,25 @@ class HistoryList extends StatelessWidget {
           return FutureBuilder<Track>(
               future: item.track,
               builder: (BuildContext context, AsyncSnapshot<Track> track) {
+                String? image = track.data?.image;
                 return Card(
-                  child: ListTile(
-                    leading: FlutterLogo(),
-                    title: Text(
-                        '${track.data?.name} by ${track.data?.artist_name}'),
-                    subtitle: Text(
-                        DateFormat.yMEd().add_jm().format(item.date.toDate())),
+                  child: InkWell(
+                    onTap: () async {
+                      String? url = track.data?.url;
+                      if (url != null) {
+                        await launch(url);
+                      }
+                    },
+                    child: ListTile(
+                      leading: image != null
+                          ? new Image.network(image)
+                          : FlutterLogo(),
+                      title: Text(
+                          '${track.data?.name} by ${track.data?.artist_name}'),
+                      subtitle: Text(DateFormat.yMEd()
+                          .add_jm()
+                          .format(item.date.toDate())),
+                    ),
                   ),
                 );
               });

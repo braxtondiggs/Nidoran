@@ -14,6 +14,7 @@ const config = admin.remoteConfig();
 let SPOTIFYTOKEN: string;
 let webHookResponse: functions.Response;
 app.use(cors({ origin: true }));
+db.settings({ ignoreUndefinedProperties: true });
 
 app.post('/webhook', async (request: functions.Request, response: functions.Response) => {
     if (request.body['data']) {
@@ -35,7 +36,7 @@ app.post('/webhook', async (request: functions.Request, response: functions.Resp
                 for await (const artist of res.artists) {
                     if (!artist.url) await saveArtist(artist);
                 }
-                await saveTrack(res.track, res.artists[0]);
+                await saveTrack(res.track, res.artists);
                 await saveQuery(res.track.id, data);
                 return response.send(await saveHistory(res.track.id));
             }
@@ -51,10 +52,6 @@ function errorHandler(msg: string) {
     throw Error();
 }
 
-function getImage(track: any, artist: any) {
-    return track.preview_url ?? track?.album?.images[0]?.url ?? artist?.images[0]?.url;
-}
-
 async function queryExistence(query: string) {
     const data: any[] = [];
     const snapshot = await db.collection('queries').where('query', '==', query).limit(1).get();
@@ -66,7 +63,7 @@ async function queryDuplicateHistory(trackId: string) {
     const data: any[] = [];
     const snapshot = await db.collection('history').orderBy('date', 'desc').limit(1).get();
     snapshot.forEach(doc => data.push(doc.data()));
-    return data[0].trackId === trackId && dayjs(data[0].date.toDate().getTime()).isAfter(dayjs().subtract(5, 'minute'));
+    return data[0].trackId === trackId && dayjs(data[0].date.toDate().getTime()).isAfter(dayjs().subtract(8, 'minute'));
 }
 
 async function querySpotify(data: string) {
@@ -148,16 +145,23 @@ async function saveArtist(artist: any) {
     }, { merge: true });
 }
 
-async function saveTrack(track: any, artist: any) {
+async function saveTrack(track: any, artists: any[]) {
+    const artist = artists[0];
+    const [, ...features] = artists;
+    const feature_ids = features.map((o) => o.id);
+    const feature_names = features.map((o) => o.name);
     await db.doc(`tracks/${track.id}`).set({
         album_id: track.album?.id,
         artist_id: artist.id,
         artist_name: artist.name,
         duration: track.duration_ms,
+        feature_ids: feature_ids.length ? feature_ids : undefined,
+        feature_names: feature_names.length ? feature_names : undefined,
         genres: artist.genres,
         id: track.id,
-        image: getImage(track, artist),
+        image: track?.album?.images[0]?.url ?? artist?.images[0]?.url,
         name: track.name,
+        preview: track.preview_url,
         track_number: track.track_number,
         url: track.external_urls?.spotify
     }, { merge: true });
