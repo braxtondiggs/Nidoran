@@ -33,7 +33,7 @@ app.post('/webhook', async (request: functions.Request, response: functions.Resp
             const res = await querySpotify(data);
             if (res) {
                 for await (const artist of res.artists) {
-                    await saveArtist(artist);
+                    if (!artist.url) await saveArtist(artist);
                 }
                 await saveTrack(res.track, res.artists[0]);
                 await saveQuery(res.track.id, data);
@@ -49,6 +49,10 @@ function errorHandler(msg: string) {
     functions.logger.error(msg);
     webHookResponse.status(500).json({ msg })
     throw Error();
+}
+
+function getImage(track: any, artist: any) {
+    return track.preview_url ?? track?.album?.images[0]?.url ?? artist?.images[0]?.url;
 }
 
 async function queryExistence(query: string) {
@@ -80,9 +84,13 @@ async function querySpotify(data: string) {
     const track = query.tracks.items[0];
     const artists = [];
     for await (const artist of track.artists) {
-        if (await checkArtistExists(artist.id)) return;
-        const { data: item } = await axios.get(`https://api.spotify.com/v1/artists/${artist.id}`, { headers: { 'Authorization': `Bearer ${SPOTIFYTOKEN}` } });
-        artists.push(item);
+        const exists = await checkArtistExists(artist.id);
+        if (exists === false) {
+            const { data: item } = await axios.get(`https://api.spotify.com/v1/artists/${artist.id}`, { headers: { 'Authorization': `Bearer ${SPOTIFYTOKEN}` } });
+            artists.push(item);
+        } else {
+            artists.push(exists);
+        }
     }
     return { artists, track };
 };
@@ -127,7 +135,7 @@ async function saveQuery(trackId: string, query: string) {
 
 async function checkArtistExists(artistId: string) {
     const snapshot = await db.doc(`artists/${artistId}`).get();
-    return snapshot.exists;
+    return snapshot.exists ? snapshot.data() : false;
 }
 
 async function saveArtist(artist: any) {
@@ -148,7 +156,7 @@ async function saveTrack(track: any, artist: any) {
         duration: track.duration_ms,
         genres: artist.genres,
         id: track.id,
-        image: track.preview_url,
+        image: getImage(track, artist),
         name: track.name,
         track_number: track.track_number,
         url: track.external_urls?.spotify

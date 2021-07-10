@@ -1,6 +1,7 @@
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -40,7 +41,7 @@ class NotificationsLog extends StatefulWidget {
 
 class _NotificationsLogState extends State<NotificationsLog> {
   final db = DatabaseService();
-  List<NotificationEvent> _log = [];
+  var dio = Dio();
   bool started = false;
   bool _loading = false;
 
@@ -80,11 +81,13 @@ class _NotificationsLogState extends State<NotificationsLog> {
     });
   }
 
-  void onData(NotificationEvent event) {
-    setState(() {
-      _log.add(event);
-    });
-    print(event.toString());
+  Future<void> onData(NotificationEvent event) async {
+    if (event.packageName == 'com.google.android.as') {
+      print(event.title);
+      await dio.post(
+          'https://us-central1-nidoran-4f077.cloudfunctions.net/endpoints/webhook',
+          data: {'data': event.title});
+    }
   }
 
   void startListening() async {
@@ -138,31 +141,13 @@ class _NotificationsLogState extends State<NotificationsLog> {
           initialData: [],
           child: HistoryList(),
         ),
-        /*Center(
-              child: ListView.builder(
-                  itemCount: _log.length,
-                  reverse: true,
-                  itemBuilder: (BuildContext context, int idx) {
-                    final entry = _log[idx];
-                    return ListTile(
-                        trailing:
-                            Text(entry.packageName.toString().split('.').last),
-                        title: Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(entry.title ?? "<<no title>>"),
-                              Text(entry.createAt.toString().substring(0, 19)),
-                            ],
-                          ),
-                        ));
-                  })),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: started ? stopListening : startListening,
         tooltip: 'Start/Stop sensing',
         child: _loading
             ? Icon(Icons.close)
-            : (started ? Icon(Icons.stop) : Icon(Icons.play_arrow)),*/
+            : (started ? Icon(Icons.stop) : Icon(Icons.play_arrow)),
       ),
     );
   }
@@ -181,6 +166,7 @@ class HistoryList extends StatelessWidget {
               builder: (BuildContext context, AsyncSnapshot<Track> track) {
                 return Card(
                   child: ListTile(
+                    leading: FlutterLogo(),
                     title: Text(
                         '${track.data?.name} by ${track.data?.artist_name}'),
                     subtitle: Text(
@@ -188,13 +174,6 @@ class HistoryList extends StatelessWidget {
                   ),
                 );
               });
-
-          /*Card(
-            child: ListTile(
-                // leading: Text(weapon.img, style: TextStyle(fontSize: 50)),
-                title: Text(tracl.),
-                subtitle: Text('Deals ${item.date} hitpoints of damage')),
-          );*/
         }).toList(),
       ),
     );
