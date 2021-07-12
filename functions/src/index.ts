@@ -18,6 +18,7 @@ db.settings({ ignoreUndefinedProperties: true });
 
 app.post('/webhook', async (request: functions.Request, response: functions.Response) => {
     if (request.body['data']) {
+        const latlng = request.body['latlng'];
         const data = request.body['data'].toLowerCase();
         webHookResponse = response;
         if (!data.includes(' by ')) return errorHandler('invalid query');
@@ -26,7 +27,7 @@ app.post('/webhook', async (request: functions.Request, response: functions.Resp
             const query = dbQuery[0];
             const duplicate = await queryDuplicateHistory(query.trackId);
             if (!duplicate) {
-                return response.send(await saveHistory(query.trackId));
+                return response.send(await saveHistory(query.trackId, latlng));
             } else {
                 return response.send('Duplicate History Found')
             }
@@ -38,7 +39,7 @@ app.post('/webhook', async (request: functions.Request, response: functions.Resp
                 }
                 await saveTrack(res.track, res.artists);
                 await saveQuery(res.track.id, data);
-                return response.send(await saveHistory(res.track.id));
+                return response.send(await saveHistory(res.track.id, latlng));
             }
         }
     } else {
@@ -78,7 +79,7 @@ async function querySpotify(data: string) {
             limit: 1
         }
     });
-    if (query.tracks.items.length === 0) return errorHandler('Seach Failure');
+    if (query.tracks.items.length === 0) return errorHandler(`Seach Failure - ${data}`);
     const track = query.tracks.items[0];
     const artists = [];
     for await (const artist of track.artists) {
@@ -114,11 +115,17 @@ async function getSpotifyToken() {
     return SPOTIFYTOKEN;
 }
 
-async function saveHistory(trackId: string) {
+async function saveHistory(trackId: string, latlng: string) {
     const history = {
         date: new Date(),
         trackId
-    };
+    } as any;
+
+    if (latlng) {
+        const [lat, lng] = latlng.split(',');
+        history.location = new admin.firestore.GeoPoint(parseFloat(lat), parseFloat(lng));
+    }
+
     await db.collection('history').add(history);
     await axios.get('https://hc-ping.com/428ffb6f-7a23-4501-a20c-b8bbf0b6ad54');
     return history;

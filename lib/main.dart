@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter_notification_listener/flutter_notification_listener.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:nidoran/db.dart';
 import 'package:nidoran/model.dart';
@@ -44,6 +45,8 @@ class NotificationsLog extends StatefulWidget {
 class _NotificationsLogState extends State<NotificationsLog> {
   final db = DatabaseService();
   var dio = Dio();
+  late LocationPermission locationPermission;
+  bool locationEnabled = false;
   bool started = false;
   bool _loading = false;
 
@@ -72,6 +75,8 @@ class _NotificationsLogState extends State<NotificationsLog> {
     IsolateNameServer.registerPortWithName(port.sendPort, "_listener_");
     port.listen((message) => onData(message));
 
+    locationEnabled = await Geolocator.isLocationServiceEnabled();
+    locationPermission = await Geolocator.checkPermission();
     var isR = await NotificationsListener.isRunning;
     print("""Service is ${!isR! ? "not " : ""} already running""");
 
@@ -80,12 +85,25 @@ class _NotificationsLogState extends State<NotificationsLog> {
     });
   }
 
+  void requestLocationPermission() async {
+    if (locationPermission == LocationPermission.denied ||
+        locationPermission == LocationPermission.deniedForever) {
+      await Geolocator.requestPermission();
+    }
+  }
+
   Future<void> onData(NotificationEvent event) async {
     if (event.packageName == 'com.google.android.as') {
-      print(event.title);
+      late Position position;
+      var data = {'data': event.title};
+      if (locationPermission == LocationPermission.always) {
+        position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+        data['latlng'] = '${position.latitude},${position.longitude}';
+      }
       await dio.post(
           'https://us-central1-nidoran-4f077.cloudfunctions.net/endpoints/webhook',
-          data: {'data': event.title});
+          data: data);
     }
   }
 
