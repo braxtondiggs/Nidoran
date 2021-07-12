@@ -46,9 +46,10 @@ app.post('/webhook', async (request: functions.Request, response: functions.Resp
     }
 });
 
-function errorHandler(msg: string) {
+async function errorHandler(msg: string) {
     functions.logger.error(msg);
-    webHookResponse.status(500).json({ msg })
+    webHookResponse.status(500).json({ msg });
+    await axios.get('https://hc-ping.com/428ffb6f-7a23-4501-a20c-b8bbf0b6ad54/fail');
     throw Error();
 }
 
@@ -119,6 +120,7 @@ async function saveHistory(trackId: string) {
         trackId
     };
     await db.collection('history').add(history);
+    await axios.get('https://hc-ping.com/428ffb6f-7a23-4501-a20c-b8bbf0b6ad54');
     return history;
 }
 
