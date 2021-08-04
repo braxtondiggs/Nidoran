@@ -9,11 +9,9 @@ class History {
   History({required this.trackId, required this.date, required this.track});
 
   factory History.fromFirestore(DocumentSnapshot doc, Future<Track> track) {
-    Map data = doc.data;
-
     return History(
-      trackId: data['trackId'] ?? '',
-      date: data['date'] ?? Timestamp.now(),
+      trackId: doc.get('trackId') ?? '',
+      date: doc.get('date') ?? Timestamp.now(),
       track: track,
     );
   }
@@ -42,16 +40,15 @@ class Track {
       required this.album_id});
 
   factory Track.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data;
     return Track(
-        album_id: data['album_id'] ?? '',
-        artist_id: data['artist_id'] ?? '',
-        artist_name: data['artist_name'] ?? '',
-        duration: data['duration'] ?? 0,
-        id: data['id'] ?? '',
-        image: data['image'] ?? '',
-        name: data['name'] ?? '',
-        track_number: data['track_number'] ?? 0,
-        url: data['url'] ?? '');
+        album_id: doc.get('album_id') ?? '',
+        artist_id: doc.get('artist_id') ?? '',
+        artist_name: doc.get('artist_name') ?? '',
+        duration: doc.get('duration') ?? 0,
+        id: doc.get('id') ?? '',
+        image: doc.get('image') ?? '',
+        name: doc.get('name') ?? '',
+        track_number: doc.get('track_number') ?? 0,
+        url: doc.get('url') ?? '');
   }
 }
